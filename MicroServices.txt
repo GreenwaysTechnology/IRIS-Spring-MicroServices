@@ -1,0 +1,591 @@
+				Micro Services
+.....................................................................................
+Application(software system) Develpment patterns:
+.................................................
+
+Network based Applications - Distributed Application
+
+Application has layers:
+
+1.User interface layer
+2.Application biz layer
+3.Data Layer /Repository layer
+  3.1.Integration layer
+
+Architecture of Distributed Application
+
+1.Mainframework based distributed
+   1.Application biz layer
+   2.Data Layer /Repository layer
+ Where as User interface layer is kept in dump terminals connected to mainframworks.
+
+Drawbacks:
+1.Too costly
+2.scalability is too difficult.
+
+Advantage:
+1.High security
+2.Centeralized management.
+
+2.Client Server Architecture
+
+2.1.Main framework based client -server , where as mainframe acts as server and digital computers act as clients.
+ 
+2.2.Digital computer based client - server architechture
+   Servers and clients are digital computers
+
+Based on this we can classify the applications  layered /tiered concept
+
+1.single tier/layer
+   client,server,database every is kept in one single machine...
+2.two tier/layer
+  user interface is kept in client machine,
+  data logic and biz logic is kept in server machine
+ both machines are connected via networks
+
+          "This arch based on LAN /WAN"
+
+3.three tier /layer
+
+ This arch based on "internet network" and web computing
+
+   client - client machine
+   server - biz logic is kept inside another machine
+   database - is kept inside another machine
+
+ Client is browser
+ Server BIZ logic is kept as "web Applications"
+ Database is accessed by "Server side technologies - J2EE,ASP/.net,PHP,....
+
+4.N-tier / layer
+
+ Client is browser
+ Server BIZ logic is kept as "web Applications"
+   -Again spilt into multi layered
+ Database is accessed by "Server side technologies - J2EE,ASP/.net,PHP,....
+.....................................................................................
+		    How to build N-tier distributed Applications
+
+Steps/Process:
+
+1.Domain Modeling
+
+  Banking, Online Food Delivery App, Ecommerce Domain
+
+2.Select technology
+
+   if your app is based on web and internet.
+  Steps:
+   1. Database -  Oracle 
+   2. MOM - RabbitMQ,IBM MQ,Microsoft MQ
+   3. Development Technology
+       Java/JEE  - Why you go with specific implmentation technologies?
+       .Net
+       Php
+
+3.Development and release methodology
+   Waterfall -  traditional dev , release
+
+Any domain consist of various modules
+ -Accounts
+ -Loans
+ -Customers
+ -Card
+etc.....
+ 
+4.Testing
+   Once the development is over, the app is going to be under testing
+
+5.Production
+   Once the app is tested fully, ready for production.
+
+6.Maintance
+   Once the app in the production, it goes on maintaince...
+
+if any app is built based on the above methodology, which is called as "Monolithic"
+
+.....................................................................................
+ Challanges in the application development,testing,relase,Production,maintaince
+
+1.Every thing has to go step by step -  this increase cost , time waste,resource waste
+
+Companies like Amazon,Netflix who wanted fast development,test,release,maintaince : Dynamic  methodology to build applications -  No downtime,
+One module takes more time ,another module takes less time, because of one module , other module should not wait.
+
+2.Technology bottleneck - Mono technology
+ 
+ The whole application is built using single technology - Java - vendor lock
+ The whole application targets single database - Oracle /Mysql/Microsoft SQL server..
+
+
+3.Employing security layer is more complicated
+
+4.Deployment / Production.
+
+   The dev and prod env is completly different
+   Bare deployment models
+   VM based deployment...
+
+...................................................................................
+			  New way of building apps
+
+
+1.Automatation is key concept 
+
+   to anays,dev,test,release,prod,maintaince
+
+Agile :(Requirement Analysis)
+
+  Agile is an iterative approach to project management and software development that helps teams deliver value to their customers faster and with fewer headaches. Instead of betting everything on a "big bang" launch, an agile team delivers work in small, but consumable, increments
+
+Breaks the application into smaller and smaller.
+ - fast delivery with quality on time.
+
+Requirments are highly dynamic, cant be freezed,since it is dynamic start development,test,release,deploy peridically.
+
+We need automation, through which  automatically only we can achive fast delivery -
+ in order to automate, a new technology was created "Dev Ops" - Dev + Operations togther.
+
+Distributed source code repo - git
+Pipe lines tools  - 
+   Jenkins -(Continuous Integration)
+
+Requirement---> Dev---push the code to source code repo---|CI Tool---Compile--Build/pack--Testing-Deployment(CD)
+
+Every thing is here Continuous happens
+
+Continuous Req Analysis
+Continuous Dev 
+Continuous release /build
+Continuous test
+Continuous release /build
+Continuous deployment
+Continuous tracing and monitoring
+
+This process applied on every module in the applications
+OrderManagement 
+   Continuous Req Analysis,Dev,release,test,deployment,tracing,monitoring
+
+CustomerManagement 
+   Continuous Req Analysis,Dev,release,test,deployment,tracing,monitoring
+
+
+if any app is built based on the above methodology, that application is called as 				  "MicroService"
+
+....................................................................................
+	     How to convert existing monolithic apps into microservices
+.....................................................................................
+
+There is a process / pattern to convert existing monolithic into microservices
+                          "Scale Cube"
+
+
+Scale Cube and Microservices:
+............................. 
+  Scale Cube is architecture pattern used to scale applications using three dimensional scalability model.
+
+X-Axis
+Z-Axis
+Y-Axis
+
+The scale defines three separate ways to scale an application.
+
+X-axis scalling load balances requests across multiple idententical instances
+
+Z-Axis scalling routes requests based on an attribute of the request.
+
+X and Z scalling both are same but which different from "algorthim"
+
+
+Both X and Z axis scalling improve the application's capacity and availability.
+
+But neither approach solves the problem of increasing development and appliation complexity.
+
+
+How to solve the application complexity?
+
+ Y scalling.
+
+Y axis scalling Functionality decomposes and an application into services:
+..........................................................................
+Y axis scales application into functions  or functional decomposition.
+
+Your App
+   -Y scalling
+       -X or Z scalling....
+
+A "service" is a mini application that implements narrowly focused funtionality,
+Such as OrderManagement,CustomerManagment,ProductManagement  and so on...
+
+The high level definition of microservices architecture(microservices) is an architectural style that "functionally decomposes an application into set of services(mini applcation)
+
+In Monlolith app the app is broken into "modules" where as microservice break as services(mini application)..
+
+What Microservices offers?
+
+1.Microservices offers "form of modularity"
+   Modualirty is essential when developing large, complex application.
+
+2.Every Service has an "API" which is an impermeable boundary which is entry and exit   of Service
+
+2.Each service has its own database - Customer Service may use "Mongodb'
+  where as payment service may use "Oracle database"
+
+
+Benefits of the microservice architecture
+
+=> It enables the continuous delivery and deployment of large, complex applications.
+=> Services are small and easily maintained.
+=>Services are independently deployable.
+=>Services are independently scalable.
+=>The microservice architecture enables teams to be autonomous.
+=>It allows easy experimenting and adoption of new technologies.
+=>It has better fault isolation
+
+....................................................................................
+			How to design and implment microservices
+
+The microservices is all about practices followed,implemented, and tested in real time production grade applications in various companies like amazon,netflix,google,microsoft.
+
+The many community people joined togther who formed the pattern language in order to begin development of Microservices - Microservice pattern language.
+.....................................................................................
+			  Pattern Languages
+.....................................................................................
+
+Pattern is a resuable soultion to  a problem that occurs in a particular context.
+
+Christopher Alexander writings inspired the software community to adopt the concept of patterns and patterns language, The book Design patterns: Elements of Resuable Object oriented Sofware - GOF patterns.
+
+Elements of patterns.
+
+Every Pattern has sections
+
+1.Forces
+2.Result Context
+3.Related patterns
+
+Forces: The issues that you must address when  sovling a problem.
+
+ The forces section of a pattern describes the forces(issues) that you must address when solving a problem in a given context.
+
+Sometimes forces can conflict, so it might not be possible to solve all of them.
+
+Which issues(forces) are more important dependens on the context.
+
+eg:
+
+When you write code in a reactive style , has better performance than non reactive sync code.
+But it more difficult to understand.
+
+
+Resulting Context:
+..................
+ The force section of a pattern describes issues(forces) that must address when a solving a problem in a given context.
+
+The result context section of a pattern describes the consequences(advantages and disadvantages) of applying the pattern.
+
+It consistts of three parts
+
+1.Befnifits: 
+   The benefits of the pattern, including the forces that have been resolved.
+2.Drawbacks:
+   The drawbacks of the pattern, including, un resolved forces.
+3.Issues
+    The new Prolmes that have been introduced by applying the pattern.
+
+The result ing context provides a more complete and less biased view of the solution
+which enables better decisions.
+
+Related Patterns:
+ The related patterns describe the relationship between the pattern and other patterns.
+ There are five types of relationship between patterns.
+  
+
+Relationships  between patterns:
+
+Predecessor – a predecessor pattern is a pattern that motivates the need for this pattern. For example, the Microservice Architecture pattern is the predecessor to the rest of the patterns in the pattern language except the monolithic architecture pattern
+
+
+Successor – a pattern that solves an issue that is introduced by this pattern. 
+For example, if you apply the Microservice Architecture pattern you must then apply numerous successor patterns including service discovery patterns and the Circuit Breaker pattern.
+
+Alternative – a pattern that provides an alternative solution to this pattern. For example, the Monolithic Architecture pattern and the Microservice Architecture pattern are alternative ways of architecting an application. You pick one or the other.
+
+Generalization: - A Pattern that is a general soultion to a problem for eg if you want to host a service , we have different implementations like single serivce per host pattern, single service on multiple hosting etc...
+
+Specialiation: - A specialized form of  a particular pattern -  For eg deploy a service as container pattern is spacilzation of a single service per host.
+....................................................................................
+		   Microservice arichitecture pattern language
+...................................................................................  
+The Microservice pattern language is a collection of patterns that help you architect an application using the microservice architectures.
+
+Infrastructure Patterns:
+  Thses solves problems that are mostly infrastructure issues outside of development.
+
+Application patterns:
+  These are for related to development
+
+Application Infrastructure:
+   Application related infrastructures like containers
+....................................................................................
+	 Patterns for Decomposing an Application into services	
+
+1.Decompose by business capability 
+	 |
+	 |
+2.Decompose by subdomain
+
+3.SelfContained Service
+
+4.Service Per Team
+.....................................................................................
+
+Common Patterns:
+
+1.Application architecture patterns
+
+-Monolithic architecture
+-Microservice architecture
+
+2.Decomposition -y scaling
+  Decompose by business capability
+  Decompose by subdomain
+  Self-contained Service
+  Service per team
+
+3.Data management
+->Database per Service
+->Shared database
+........................
+->Saga
+->Command-side replica
+->API Composition
+->CQRS
+->Domain event
+->Event sourcing
+..........
+
+DataBase Per Service:
+.....................
+
+Context:
+ You are building microservice app.
+ Services need to persit data into some kind of databases
+ For eg OrderService stores data into OrderDatabase , Customer Stores data into  Customer Database
+
+Problem:
+  What is the db arch in a microservice app?
+
+Forces: (Issues you must address when you solve a problem)
+
+=>Services must be lossly coupled so that they can be developed,deployed and scaled independently.
+
+=>Some business transactions must enforce invariants that span multiple services. For example, the Place Order use case must verify that a new Order will not exceed the customer’s credit limit. Other business transactions, must "update data" owned by multiple services. - Update Operation across multiple services and multiple databases
+
+=>some business transactions need to query data that is owned by multiple services. For example, the View Available Credit use must query the Customer to find the creditLimit and Orders to calculate the total amount of the open orders -Select Data across multiple services and multiple databases
+
+=>Some queries must join data that is owned by multiple services. For example, finding customers in a particular region and their recent orders requires a join between customers and orders = Select data across multiple data bases and services
+
+=>Databases must sometimes be replicated and sharded in order to scale
+
+
+=>Different services have different data storage requirements. For some services, a relational database is the best choice. Other services might need a NoSQL database such as MongoDB, which is good at storing complex, unstructured data, or Neo4J, which is designed to efficiently store and query graph data
+
+
+Solution:
+=>Keep each microservice’s persistent data private to that service and accessible only via its API. 
+=>A service’s transactions only involve its database (Local Transactions)
+
+=>The service’s database is effectively part of the implementation of that service.  It cannot be accessed directly by other services.
+
+=>Storage options:
+  1.Private-tables-per-service – each service owns a set of tables that must only be accessed by that service
+  2.Schema-per-service – each service has a database schema that’s private to that service
+  3.Database-server-per-service – each service has it’s own database server.
+
+
+Resulting context
+
+Advantages:
+ 1.Helps ensure that the services are loosely coupled. Changes to one service’s    database does not impact any other services.
+
+ 2.Each service can use the type of database that is best suited to its needs. For       example, a service that does text searches could use ElasticSearch. A service that    manipulates a social graph could use Neo4j.
+
+DisAdvantages:
+ 
+ 1.Implementing business transactions that span multiple services is not straightforward. 
+ 2.Distributed transactions are best avoided because of the CAP theorem.
+ 3.Moreover, many modern (NoSQL) databases don’t support them.
+ 4.Implementing queries that join data that is now in multiple databases is challenging.
+ 5.Complexity of managing multiple SQL and NoSQL databases
+
+What if i want transactions and query?
+
+ ->How to handle distributed transactions that spwan across multiple service.
+	SAGA pattern
+ ->Implementing queries that span services:
+	API Composition
+        CQRS
+....................................................................................
+			Micro serivce implementations
+...................................................................................
+
+Microservice is architecture that proposes various patterns and principles, it is language, platform independant.
+
+Java Microservices:
+..................
+ Java technology provides various microservices pattern implementations.
+
+1.Spring cloud
+2.Quarkus
+3.Vertx
+4.Akka with Microservices /Play
+5.Micronaut 
+etc...
+
+Spring cloud offers many pattern implementations.
+.....................................................................................
+			  Service API design 
+....................................................................................
+
+API is entry and exit point of any services.
+
+API: 
+->RPI -Remote Procedure Invocation
+      -WebServices
+	  ->REST,SOAP
+           -GraphQL
+      -RPC
+         gRpc
+         Apache Thrift
+->Messaging
+    -MOM 
+       RabbitMQ,MicroSoft MQ,IBM MQ,Active MQ ..
+    -Streaming
+       Kafka
+->Domain Speficfic
+   Email servies
+   Media Stream -RTMP,HLS
+
+Spring supports all types of api
+ WebServices
+   REST
+ RPC 
+  Grpc
+.....................................................................................
+			Spring boot with Spring cloud
+.....................................................................................
+
+Context:
+  How to build Database Per Service pattern, How to handle update operations across multiple Micro Services?
+
+Artifacts:
+1.REST api using Spring MVC
+2.Data Repositories using Spring JPA
+3.Enabling Transactions.
+
+Issues:
+ When we build and run multiple services, some service's data update is based on other service data update - transaction
+
+Local transaction is possible , what if i want to ensure transactions across the databases(across services)
+
+Saga:
+....
+What is saga?
+  Each biz transaction which spans mutiple microservices are spilt into microservice specif local transactions and they are executed in a sequence to comple the biz work flow - It is called saga.
+
+Distributed Transactions implementations:
+1.2phase commit-2PC - old way , not recommended
+
+Microservices based Transaction implementation:
+...............................................
+1.Choreography
+2.Orchestration
+
+Choreography-based saga:
+
+ The state of application is captured as event.
+ The event is emitted to other Services via Event Channels.
+
+How to implement Choreography-based saga in Spring Cloud Application?
+
+Requirements:
+1.API with Repository with transactions enabled
+2.Communication Channel - Transporter
+
+Transporter:
+ Any Message Brokers technology we can use
+ Any Streamming platforms we can use- Recommended.
+
+Streaming Platform:
+ -Apache Kafka
+ -Debezium
+ -Eventuate Tram
+
+How to integrate Streaming platforms with Spring boot application?
+
+Spring cloud offers "Spring Cloud Stream"
+
+Spring Cloud Stream:
+
+ Spring Cloud Stream is a framework for building highly scalable event-driven microservices connected with shared messaging systems
+
+Binder Implementations
+
+1.RabbitMQ
+2.Apache Kafka
+3.Kafka Streams
+4.Amazon Kinesis
+
+
+Destination Binders: Components responsible to provide integration with the external messaging systems.
+
+Destination Bindings: Bridge between the external messaging systems and application code (producer/consumer) provided by the end user.
+
+Message: The canonical data structure used by producers and consumers to communicate with Destination Binders (and thus other applications via external messaging systems).
+
+Dependencies:
+
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-stream-kafka</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-stream-binder-kafka-reactive</artifactId>
+</dependency>
+
+
+application.properties
+spring.cloud.stream.kafka.binder.brokers=localhost
+spring.cloud.stream.kafka.binder.defaultBrokerPort
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
