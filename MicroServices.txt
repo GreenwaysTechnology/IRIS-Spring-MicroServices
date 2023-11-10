@@ -2825,7 +2825,7 @@ KafkaMessage [payload=PayLoad [id=1, event=order_created, eventId=1, payload={"n
 
 The delivery service can then start storing these orders internally in its own tables and start preparing coffee for each order and deliver it in their own time
 .....................................................................................
-			  CQRS - Command Query Responsibility Segregation
+			 CQRS - Command Query Responsibility Segregation
 ................................................................................
 
 You have applied the Microservices architecture pattern and the Database per service pattern.
@@ -2888,5 +2888,734 @@ Level-3 : Database Per service pattern
 			 Transactional outbox
 				|
 			      Kafka
+....................................................................................
+				Service Communications
+....................................................................................
+
+Services are mini applications, which are collection of objects, each object has apis.
+APIs are entry and exit point of application.
+
+Types of APIS:
+RPI - Remote Procudure invocation.
+In object oriented programming objects talk each via api calls.
+
+Objects easily collbarate within same runtime. - local method invocation.
+
+API style:
+
+1.blocking style or synchrous style
+  any how object is hosted by a thread, when you call method on that thread, thread   is blocked until the result is available
+
+2.non blocking style or async style
+   thread will not be blocked by caller object..
+
+3.Reactive style
+    Enabling data streaming feature, using event driven model,caller and callee is decoupled , they talk via message passing..
+
+ Reactive with non blocking is good choice.
+
+In spring , you can use Project reactor framework to enable this option.   
+
+
+Objects easily collbarate within same runtime. - local method invocation.
+..........................................................................
+
+Remote Method calls:
+
+ if objects are in different runtime, they need,network protocal... 
+ object must understand how to send and receive messages via network.
+ Most popular network protocal is internet protocals such tcp/ip,http,http/2...
+
+REST end point is most populare implementation called webservices...
+
+WebServices communication:
+..........................
+Internal communiction
+
+   In Micro services, applications could be exposed by HTTP API, within organzation
+any how they need to  talk each other, in order to exchange messages.
+methods can be sync or async or reactive...
+
+External communication
+
+ User interface applications,used by external users like human beginings or automated AI systems.. 
+  Which is called external communication.
+
+
+RPI Technology:
+ 1.REST/SOAP
+ 2.GraphQL 
+ 3.Apache Thrift
+RPC
+ GRpc
+
+Message oriented Middleware Technology
+ 1.Kafka 
+ 2.RabbitMQ
+
+Other Technologies
+ Mail service,file services...
+
+Microservices can use any coimbation of api and communcation style patterns...
+
+rest and message...
+....................................................................................
+			 Micro service Internal Communication
+				 Challanges
+...................................................................................
+
+Traditionally, monolith applications are deployed in fixed locations (hosts and ports)
+
+Now a days, we deploy our apps in virtualized enviroments such as cloud and containers, where there is no fixed locations like hosts(ip address) and port
+
+So services , cant talk each other because the locations of those services are highly dynmic. in order to solve the problem, microservices proposed a design pattern 
+.....................................................................................
+			    Service Registry and  Discovery
+.....................................................................................
+
+Registry:
+ It is a software which stores all service informations within microservices.
+
+Most Populare Registry Servers:
+
+1.Netflix Eureka
+   Eureka is a RESTful (Representational State Transfer) service that is primarily used in the AWS cloud for the purpose of discovery, load balancing and failover of middle-tier servers. It plays a critical role in Netflix mid-tier infra.
+
+2.Hashicorp "Consul"
+   It is most populare Service registry,distributed configuration server..
+
+3.ETCD 
+   Distributed reliable key-value store for the most critical data of a distributed system
+
+Spring cloud provides api to register and deregister with Registery servers with annotations and dependencies...
+
+Discovery:
+..........
+   The process of locating services from the registry , called discovery....
+
+Types of Discovery:
+
+1.Client side discovery
+=>Client Service will have feature to access registry directly,so that they can call services easily
+=>It is good , even  though a single service fails, the other services can proceed 
+
+2.Server side discovery
+
+=>Client Service will access the registry via "Router" , which access registry server through which service calls will go.
+=>Single point of failure, if router failed , no service can talk to other services..
+
+We will see how to implement Client Side discovery.
+
+HTTP /REST api communication apis in Spring Cloud:
+..................................................
+
+1.RestTemplate
+ RestTemplate is a synchronous client to perform HTTP request. It is original Spring Rest client and exposes a simple, template method API over underlying http client libraries
+2.WebClient
+  Web client is non blocking, reactive client to perform http requests.
+3.Spring Cloud OpenFeign client api
+	Declarative REST Client: Feign creates a dynamic implementation of an interface decorated with JAX-RS or Spring MVC annotations
+
+
+Implementations:
+
+Create Three Spring boot application
+1.Act as ServiceRegistry and Discovery Server.
+2.Hello-Service App - Callee
+3.Hello-WebClient-Service  App -Caller
+
+1.NetflixEureka as server.
+
+Note: when we use eureka , you dont need to run separate eureka server, eureka server is written in java, so it is embeded as part of the application.
+
+
+Steps:
+1.pom.xml
+
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+</dependency>
+
+1.application.properties
+server.port=8761
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+logging.level.com.netflix.eureka=OFF
+logging.level.com.netflix.discovery=OFF
+
+2.Application
+package com.example;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+
+@SpringBootApplication
+@EnableEurekaServer
+public class ServiceRegisteryApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ServiceRegisteryApplication.class, args);
+	}
+
+}
+
+2.Hello Service:
+
+pom.xml
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+	</dependency>
+
+
+application.properties
+eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
+spring.application.name=hello-service
+eureka.client.instance.preferIpAddress = true
+server.port=${PORT:0}
+eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+
+Note:
+ =>Every service is registered with Service registry with application-name.
+    spring.application.name=hello-service
+ =>Other services lookup services by name..
+
+server.port=${PORT:0} = Dynamic porteureka.instance.instance-id=
+
+Simple Rest api:
+................
+package com.hello;
+
+public class Hello {
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+}
+
+package com.hello;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+@RestController
+public class HelloController {
+    private AtomicLong counter = new AtomicLong();
+    @Value("${eureka.instance.instance-id}")
+    private String instanceId;
+
+
+    @GetMapping("/hello")
+    public Hello getHelloWordObject() {
+        Hello hello = new Hello();
+        // hello.setMessage("Hi there! you are number " + counter.incrementAndGet());
+        hello.setMessage("I am from : " + instanceId);
+        return hello;
+    }
+}
+
+package com.hello;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+
+@SpringBootApplication
+//@EnableEurekaClient //allow to registr this service into registry server
+@EnableDiscoveryClient  // It talks to any registry server...
+public class HelloServiceApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(HelloServiceApplication.class, args);
+    }
+
+}
+.........
+Caller Service : HelloWebClientService
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+
+
+application.properties
+#eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
+#spring.application.name=hello-webclient-service
+server.port=8083
+eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
+spring.application.name=hello-webclient-service
+#eureka.instance.hostname=localhost
+#spring.cloud.client.hostname=localhost
+eureka.client.instance.preferIpAddress = true
+#server.port=${PORT:0}
+eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+
+Caller Code:
+    //call api using rest template
+    @GetMapping(value = "/client/static")
+    public ResponseEntity<Hello> helloV1() {
+        String url = "http://localhost:8080/hello";
+        Hello helloResponse = restTemplate.getForObject(url, Hello.class);
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+
+
+
+Spring cloud Open Feign:
+.......................
+
+1.Declare interface which has all REST API mapping,its implementation given by spring ..
+package com.hello.client;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+
+//hello-service is name of the service from HelloService
+@FeignClient("hello-service")
+public interface HelloServiceFeignClient {
+    @GetMapping("/hello")
+    ResponseEntity<Hello> hello();
+}
+
+2.Inject FeignClientInterface into Controller..
+
+   @Autowired
+    private HelloServiceFeignClient feignClient;
+
+   @GetMapping(value = "/client/feign")
+    public ResponseEntity<Hello> helloV3() {
+        Hello helloResponse = feignClient.hello().getBody();
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+
+package com.hello.client;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
+@RestController
+public class HelloWebClientController {
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private HelloServiceFeignClient feignClient;
+
+    //fetch registry instance information
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
+    //call api using rest template
+    @GetMapping(value = "/client/static")
+    public ResponseEntity<Hello> helloV1() {
+        String url = "http://localhost:8080/hello";
+        Hello helloResponse = restTemplate.getForObject(url, Hello.class);
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+
+    @GetMapping("/")
+    public String sayHello() {
+        return "Hello";
+    }
+
+    @GetMapping(value = "/client/dynamic")
+    public ResponseEntity helloV2() {
+        List<ServiceInstance> instances = discoveryClient.getInstances("hello-service");
+        Hello helloResponse = null;
+        if (instances != null && instances.size() > 0) {
+            ServiceInstance serviceInstance = instances.get(0);
+            System.out.println(serviceInstance.getHost() + " " + serviceInstance.getPort() + " " + serviceInstance.getServiceId());
+            System.out.println(serviceInstance.getInstanceId());
+            String service_Name = serviceInstance.getServiceId();
+            String url = "http://" + service_Name + "/hello";
+            System.out.println(url);
+            helloResponse = restTemplate.getForObject(url,
+                    Hello.class);
+            System.out.println(helloResponse);
+        }
+        return  ResponseEntity.ok(helloResponse);
+
+    }
+
+    @GetMapping(value = "/client/feign")
+    public ResponseEntity<Hello> helloV3() {
+        Hello helloResponse = feignClient.hello().getBody();
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+
+    @GetMapping("/client/loadbalanced")
+    public ResponseEntity<Hello> loadBalanced() {
+        //accessing hello-service
+        String url = "http://hello-service/hello";
+        Hello helloResponse = restTemplate.getForObject(url, Hello.class);
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+}
+.....................................................................................
+			 Service Registry with Consul
+.....................................................................................
+
+Steps:
+1.You need to run consul server.
+  You can setup consul server with docker or standalone...
+
+1.docker run --rm --name consul -p 8500:8500 -p 8501:8501 consul:1.7 agent -dev -ui -client=0.0.0.0 -bind=0.0.0.0 --https-port=8501
+
+
+2.pom.xml
+  <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+    </dependency>
+
+3.application.yml
+
+spring:
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+
+
+Callee:
+package com.javatechie.spring.consul.api;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+@RestController
+public class GreetingServiceApplication {
+	
+	@GetMapping("/greeting")
+	public String getMessage() {
+		return "Welcome to java techie";
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(GreetingServiceApplication.class, args);
+	}
+
+}
+
+Caller:
+package com.javatechie.spring.consul.api;
+
+import java.net.URI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+@RestController
+public class UserServiceApplication {
+
+    @Autowired
+    private RestTemplate template;
+
+    @Autowired
+    private DiscoveryClient client;
+
+    @GetMapping("/accessAPI")
+    public String invokeGreetingService() {
+        URI uri = client.getInstances("Greeting-service").stream().map(si -> si.getUri()).findFirst()
+                .map(s -> s.resolve("/greeting")).get();
+        System.out.println(uri.getHost() + uri.getPort());
+        return template.getForObject(uri, String.class);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(UserServiceApplication.class, args);
+    }
+
+    @Bean
+    public RestTemplate template() {
+        return new RestTemplate();
+    }
+}
+....................................................................................
+			Scalability and Load Balancing
+			   (High availability)		   .....................................................................................
+	
+In Enterprise applications, many users may access in a second, like one thousand users per ms.
+
+if you have hosted your application on single server, server cant respond to all users on time.
+
+Thats why we need to scale our app.
+
+There two types scalability:
+
+1.With vertical scaling (“scaling up”), you're adding more compute power to your existing instances/nodes.
+
+2.In horizontal scaling (“scaling out”), you get the additional capacity in a system by adding more instances to your environment, sharing the processing and memory workload across multiple devices
+
+Micro services can be scalled horzontally - we can run the same microservices n-number of times, when we run apps n-numbers we need load balancer to select instance.
+
+
+Load Balancer:
+ One of the most promienent reasons of evolution from monolith to microservices  arch is horizontal scalling.
+
+It helps to improve performance incase of higher traffic for a particular service.
+
+We need to create multiple instances of the service in order to handle the large traffic of requests.
+
+Load balancing referes to efficiently distributing the incoming network traffic across a group of backend servers( multiple instances of the services).
+
+
+Types of load balancing:
+
+1.server-side loading balancing
+2.client-side load balancing.
+
+
+1.Server-side load balancer:
+  In server side load balancing, the instances of services are deployed on multiple servers and then a load balancer is put in front of them. It is generally a hardware load balancer.
+  
+  All requests are initally routed via server side load balancer to the application.
+
+2.Client side/software load balancer:
+ 
+  Software load balancer is front gate to the applications(microservice)
+  Software load balancer is embeded as part of service registry
+
+
+Client side load balancing:
+ Spring boot with Netflix , who offers load balancer called "Ribbon".
+
+Ribbon:
+->Client side load balancer
+->it offers falut tolearance..
+
+
+Hello-Service , we need to run multiple copies; Refer the previous code
+...............................................
+You can build or you run in dev env:
+
+>java -jar target/hello-service-0.0.1-SNAPSHOT.jar
+>java -jar target/hello-service-0.0.1-SNAPSHOT.jar
+>java -jar target/hello-service-0.0.1-SNAPSHOT.jar
+>java -jar target/hello-service-0.0.1-SNAPSHOT.jar
+
+
+   @GetMapping("/client/loadbalanced")
+    public ResponseEntity<Hello> loadBalanced() {
+        //accessing hello-service
+        String url = "http://hello-service/hello";
+        Hello helloResponse = restTemplate.getForObject(url, Hello.class);
+        return ResponseEntity.status(200).body(helloResponse);
+    }
+.....................................................................................
+			API  Gateway
+
+What is role of gateway?
+
+1.Request filtering
+   -Security
+2.Response shapping    
+ 
+API gate in microservices other wise called as EdgeService or Routers and filters.
+
+Embedded Zuul Reverse Proxy:
+ Spring Cloud has created an embedded Zuul proxy to ease the development of a common use case where a UI application wants to make proxy calls to one or more back end services. This feature is useful for a user interface to proxy to the back end services it requires, avoiding the need to manage CORS and authentication concerns independently for all the back ends.
+
+To enable it, annotate a Spring Boot main class with @EnableZuulProxy. Doing so causes local calls to be forwarded to the appropriate service. By convention, a service with an ID of users receives requests from the proxy located at /users (with the prefix stripped). The proxy uses Ribbon to locate an instance to which to forward through discovery. All requests are executed in a hystrix command, so failures appear in Hystrix metrics. Once the circuit is open, the proxy does not try to contact the service.
+
+Zull is webApplication like Eureka server
+..........................................
+
+Create SpringBoot App, add 
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+2.Enable Zuul
+@EnableZuulProxy
+@SpringBootApplication
+public class RoutingAndFilteringGatewayApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(RoutingAndFilteringGatewayApplication.class, args);
+  }
+
+  @Bean
+  public SimpleFilter simpleFilter() {
+    return new SimpleFilter();
+  }
+
+}
+
+
+Filter Code :
+ if you want to write any request processing logic, 
+
+Types of filters:
+
+1.pre filter
+2.post filter
+3.route filter
+4.error filter
+
+import com.netflix.zuul.ZuulFilter;
+
+public class ErrorFilter extends ZuulFilter {
+
+	@Override
+	public String filterType() {
+		return "error";
+	}
+
+	@Override
+	public int filterOrder() {
+		return 0;
+	}
+
+	@Override
+	public boolean shouldFilter() {
+		return true;
+	}
+
+	@Override
+	public Object run() {
+		System.out.println("Using Route Filter");
+
+		return null;
+	}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+Gateway Code:
+package com.example.routingandfilteringgateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import org.springframework.context.annotation.Bean;
+import com.example.routingandfilteringgateway.filters.pre.SimpleFilter;
+
+@EnableZuulProxy
+@SpringBootApplication
+public class RoutingAndFilteringGatewayApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(RoutingAndFilteringGatewayApplication.class, args);
+  }
+
+  @Bean
+  public SimpleFilter simpleFilter() {
+    return new SimpleFilter();
+  }
+
+
+}
+
+Filter
+package com.example.routingandfilteringgateway.filters.pre;
+
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+
+public class SimpleFilter extends ZuulFilter {
+
+    private static Logger log = LoggerFactory.getLogger(SimpleFilter.class);
+
+    @Override
+    public String filterType() {
+        return "pre";
+    }
+
+    @Override
+    public int filterOrder() {
+        return 1;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        HttpServletRequest request = ctx.getRequest();
+
+        log.info(String.format("%s request to %s", request.getMethod(), request.getRequestURL().toString()));
+
+        return null;
+    }
+
+}
+.....................................................................................
+			  Falut Tolerance
+.....................................................................................
+
+There are different type of problems and each problem can be solved by different patterns.
+
+1.bulk head
+2.timeout-Timelimtter
+3.RateLimitter
+4.Retry
+5.CircuitBreaker
+
+BulkHead:
+ Limit concurrent execution so that failures in that area can't overload the whole system.
+ This will prevent flooding,or it prevents Dos Attack on service....
+
+
+Rate Limitter:
+
+
+
+
+
+
+
+
+
+
 
 
